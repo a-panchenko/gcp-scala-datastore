@@ -54,7 +54,7 @@ package object query {
     }
 
     private def configureBuilder() = {
-      val kind = extractRuntimeClass[E]().getCanonicalName
+      val kind = DatastoreService.getKind[E]()
       builder.setKind(kind)
       filters match {
         case head :: Nil => builder.setFilter(head)
