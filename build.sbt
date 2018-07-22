@@ -42,6 +42,7 @@ libraryDependencies ++= {
   val specsVersion = "3.8.8"
 
   Seq(
+    "com.typesafe.scala-logging" %% "scala-logging" % "3.9.0",
     "org.scala-lang" % "scala-reflect" % scalaVersion.value,
     "com.google.cloud" % "google-cloud-datastore" % gcdJavaSDKVersion,
     "org.specs2" %% "specs2-core" % specsVersion % "test",

@@ -1,6 +1,7 @@
 package io.applicative.datastore
 
 import com.google.cloud.datastore.{DatastoreOptions, DatastoreReader, Entity, EntityQuery, KeyFactory, Transaction, Datastore => CloudDataStore, Key => CloudKey}
+import com.typesafe.scalalogging.Logger
 import io.applicative.datastore.exception.UnsupportedIdTypeException
 import io.applicative.datastore.util.reflection.{Kind, ReflectionHelper}
 
@@ -14,9 +15,8 @@ import scala.reflect.runtime.universe._
 object DatastoreService extends Datastore with ReflectionHelper {
 
   private var _cloudDataStore: CloudDataStore = DatastoreOptions.getDefaultInstance.getService
-
   private val keyFactories = collection.mutable.Map[String, KeyFactory]()
-
+  private val log = Logger[Datastore]
   private def cloudDataStore = _cloudDataStore
 
   override private[datastore] def setCloudDataStore(cloudDatastore: CloudDataStore): Unit = {
@@ -172,6 +172,7 @@ object DatastoreService extends Datastore with ReflectionHelper {
   private def wrapGet[E: TypeTag : ClassTag](v: Any): Option[E] = {
     val clazz = extractRuntimeClass[E]()
     val kind = getKind[E]()
+    log.debug("Performing wrapGet for class {} and kind {}", clazz.getName, kind)
     val cloudDataStoreReader: DatastoreReader = cloudDataStore
     val key = v match {
       case id: Long => getKeyFactory(kind).newKey(id)
@@ -179,6 +180,7 @@ object DatastoreService extends Datastore with ReflectionHelper {
       case key: Key => key.key
     }
     val entity = Option(cloudDataStoreReader.get(key))
+    log.debug("Entity for class {} and kind {} was found: {}", clazz.getName, kind, entity.isDefined)
     entity.map(datastoreEntityToInstance[E](_, clazz))
   }
 
